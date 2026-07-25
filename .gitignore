@@ -64,7 +64,6 @@ htmlcov/
 
 # Docker
 *.dockerignore
-Dockerfile
 docker-compose*.yml
 
 # Secrets

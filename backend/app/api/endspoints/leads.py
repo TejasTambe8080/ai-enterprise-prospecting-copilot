@@ -4,12 +4,17 @@ from datetime import datetime
 import asyncio
 
 from app.models.lead import Lead, LeadStatus
+from pydantic import BaseModel, Field
 from app.core.database import MongoDB, get_database
 from app.agents.orchestrator import AgentOrchestrator
 from app.core.logging import get_logger
 
 router = APIRouter()
 logger = get_logger(__name__)
+
+
+class EmailProcessingRequest(BaseModel):
+    email_content: str = Field(min_length=1, max_length=100_000)
 
 @router.post("/")
 async def create_lead(lead: Lead) -> Dict[str, Any]:
@@ -149,14 +154,14 @@ async def process_lead(lead_id: str, background_tasks: BackgroundTasks) -> Dict[
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/process-email")
-async def process_email(email_content: str, background_tasks: BackgroundTasks) -> Dict[str, Any]:
+async def process_email(payload: EmailProcessingRequest) -> Dict[str, Any]:
     """Process an email directly"""
     try:
         # Create orchestrator
         orchestrator = AgentOrchestrator()
         
         # Process lead
-        result = await orchestrator.process_lead(email_content)
+        result = await orchestrator.process_lead(payload.email_content)
         
         return {
             "status": "success",

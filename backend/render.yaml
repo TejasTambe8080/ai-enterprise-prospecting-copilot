@@ -1,100 +1,26 @@
 services:
-  # Main Web Service
   - type: web
     name: flytbase-bdr-backend
     runtime: python
-    repo: https://github.com/your-username/flytbase-bdr-system
     plan: starter
     region: oregon
-    buildCommand: |
-      pip install --upgrade pip
-      pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
       - key: ENVIRONMENT
         value: production
       - key: DEBUG
-        value: false
-      - key: PORT
-        value: 8000
+        value: "false"
       - key: MONGODB_URI
         sync: false
-        value: mongodb+srv://username:password@cluster.mongodb.net/flytbase_bdr?retryWrites=true&w=majority
-      - key: MONGODB_DB_NAME
-        value: flytbase_bdr
       - key: GEMINI_API_KEY
         sync: false
-        value: your-gemini-api-key-here
-      - key: GEMINI_MODEL
-        value: gemini-1.5-pro
       - key: SECRET_KEY
         generateValue: true
+      - key: MONGODB_DB_NAME
+        value: flytbase_bdr
       - key: ALLOWED_ORIGINS
-        value: https://flytbase-bdr-frontend.vercel.app,https://flytbase-bdr.vercel.app,https://your-custom-domain.com
+        value: https://flytbase-bdr-frontend.vercel.app
       - key: ALLOWED_HOSTS
         value: "*"
-      - key: RATE_LIMIT_PER_MINUTE
-        value: "60"
-      - key: REDIS_URL
-        sync: false
-        value: redis://localhost:6379
-      - key: SENDGRID_API_KEY
-        sync: false
-        value: your-sendgrid-api-key
-      - key: FROM_EMAIL
-        value: bdr@flytbase.com
-      - key: LINKEDIN_API_KEY
-        sync: false
-        value: your-linkedin-api-key
-      - key: CRUNCHBASE_API_KEY
-        sync: false
-        value: your-crunchbase-api-key
-      - key: NEWS_API_KEY
-        sync: false
-        value: your-news-api-key
-    
-    # Auto-scaling configuration
-    scaling:
-      minInstances: 1
-      maxInstances: 3
-      targetCPUPercent: 70
-      targetMemoryPercent: 80
-
-  # Background Worker for Celery (Optional)
-  - type: worker
-    name: flytbase-bdr-worker
-    runtime: python
-    repo: https://github.com/your-username/flytbase-bdr-system
-    plan: starter
-    region: oregon
-    buildCommand: |
-      pip install --upgrade pip
-      pip install -r requirements.txt
-    startCommand: celery -A app.workers.celery_app worker --loglevel=info
-    envVars:
-      - key: ENVIRONMENT
-        value: production
-      - key: MONGODB_URI
-        sync: false
-        value: mongodb+srv://username:password@cluster.mongodb.net/flytbase_bdr?retryWrites=true&w=majority
-      - key: MONGODB_DB_NAME
-        value: flytbase_bdr
-      - key: GEMINI_API_KEY
-        sync: false
-        value: your-gemini-api-key-here
-      - key: REDIS_URL
-        sync: false
-        value: redis://your-redis-url:6379
-      - key: SECRET_KEY
-        generateValue: true
-
-  # Redis Cache (Optional - if using Render Redis)
-  - type: redis
-    name: flytbase-bdr-redis
-    plan: starter
-    region: oregon
-    ipAllowList:
-      - source: 0.0.0.0/0
-        description: Allow all
-    maxmemoryPolicy: noeviction
